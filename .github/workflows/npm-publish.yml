@@ -1,8 +1,8 @@
-name: Run Bot 24/7
+name: 🚀 Ultimate Secure Bot v2
 
 on:
   schedule:
-    - cron: "*/30 * * * *"  # প্রতি 30 মিনিটে run
+    - cron: "*/15 * * * *"   # প্রতি 15 মিনিটে run
   workflow_dispatch:
 
 jobs:
@@ -10,10 +10,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: 📥 Clone Repo
+    - name: 📥 Checkout
       uses: actions/checkout@v3
 
-    - name: ⚙️ Setup Node.js
+    - name: ⚙️ Setup Node
       uses: actions/setup-node@v3
       with:
         node-version: 18
@@ -21,7 +21,35 @@ jobs:
     - name: 📦 Install
       run: npm install
 
-    - name: 🚀 Run Bot (Short time)
+    - name: 🔐 Security Check
       run: |
-        echo "Bot starting..."
-        timeout 20m node index.js || echo "Restarting..."
+        if [ -z "${{ secrets.APPSTATE }}" ]; then
+          echo "❌ Missing APPSTATE"; exit 1;
+        fi
+        if [ -z "${{ secrets.OWNER_ID }}" ]; then
+          echo "❌ Missing OWNER_ID";61582071385233;
+        fi
+
+    - name: 🛡️ Inject Secrets
+      run: |
+        echo "APPSTATE=${{ secrets.APPSTATE }}" >> .env
+        echo "OWNER_ID=${{ secrets.OWNER_ID }}" >> .env
+
+    - name: 🚀 Run Bot Loop
+      run: |
+        echo "🔥 Starting Bot Loop..."
+        for i in {1..3}
+        do
+          echo "🔁 Cycle $i"
+          timeout 10m node index.js || echo "⚠️ Crash detected"
+          sleep 5
+        done
+
+    - name: 📊 Status Output
+      if: always()
+      run: echo "✅ Cycle finished - Restart scheduled"
+
+    - name: 🔁 Force Re-run Trigger
+      if: always()
+      run: |
+        echo "⏰ Waiting for next cron run..."
