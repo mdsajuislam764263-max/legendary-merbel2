@@ -108,9 +108,9 @@ module.exports = {
           "╔══『 𝐏𝐑𝐄𝐅𝐈𝐗 』══╗\n"
         + `║ 🌍 System : ${globalPrefix}\n`
         + `║ 💬 Chatbox : ${threadPrefix}\n`
-        + `║ ➤ ${threadPrefix}help to see all available cmds 🥵\n`
+        + `║ ➤ ${threadPrefix}help to see all available cmds ☠️☠️\n`
         + "╚═══════════════╝",
-        attachment: await utils.getStreamFromURL("https://files.catbox.moe/ykk54z.jpg")
+        attachment: await utils.getStreamFromURL("https://i.imgur.com/zYIlgBl.jpg")
       });
     }
   }
