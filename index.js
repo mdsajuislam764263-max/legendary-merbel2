@@ -1,57 +1,64 @@
-require('dotenv').config();
-const login = require("facebook-chat-api");
-const security = require('./security');
+require("dotenv").config();
+/**
+ * Goat Bot Render Deployment Fix by Eren
+ */
 
-// 🔐 Load AppState
-const appState = security.getAppState();
+const express = require("express");
+const { spawn } = require("child_process");
+const log = require("./logger/log.js");
+// === BIG TEXT LOG (PURE GREEN) ===
+console.log(`
+\x1b[32m
+ █████╗ ██████╗ ██████╗ ██╗  ██╗███████╗██╗     ██╗ ██████╗ ███╗   ██╗
+██╔══██╗██╔══██╗██╔══██╗██║  ██║██╔════╝██║     ██║██╔═══██╗████╗  ██║
+███████║██████╔╝██████╔╝███████║█████╗  ██║     ██║██║   ██║██╔██╗ ██║
+██╔══██║██╔═══╝ ██╔═══╝ ██╔══██║██╔══╝  ██║     ██║██║   ██║██║╚██╗██║
+██║  ██║██║     ██║     ██║  ██║███████╗███████╗██║╚██████╔╝██║ ╚████║
+╚═╝  ╚═╝╚═╝     ╚═╝     ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝ ╚═════╝ ╚═╝  ╚═══╝
 
-// 👑 Admin ID (multiple support)
-const ADMINS = process.env.OWNER_ID.split("61582071385233");
+                        ██╗  ██╗
+                        ╚██╗██╔╝
+                         ╚███╔╝
+                         ██╔██╗
+                        ██╔╝ ██╗
+                        ╚═╝  ╚═╝
 
-// ⏱️ delay function
-const delay = (ms) => new Promise(res => setTimeout(res, ms));
+             ███████╗██████╗ ███████╗███╗   ██╗
+             ██╔════╝██╔══██╗██╔════╝████╗  ██║
+             █████╗  ██████╔╝█████╗  ██╔██╗ ██║
+             ██╔══╝  ██╔══██╗██╔══╝  ██║╚██╗██║
+             ███████╗██║  ██║███████╗██║ ╚████║
+             ╚══════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝
+\x1b[0m
+`);
 
-// 🚫 anti spam (simple)
-let lastMessageTime = {};
 
-login({ appState }, (err, api) => {
-  if (err) return console.error("Login error:", err);
+// === Express server to keep Render service alive ===
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-  console.log("✅ Secure Bot Running...");
-
-  api.listenMqtt(async (err, event) => {
-    if (err) return console.error(err);
-
-    const sender = event.senderID;
-    const thread = event.threadID;
-    const msg = event.body;
-
-    // 🔐 Only admin access
-    if (!ADMINS.includes(sender)) return;
-
-    // 🚫 Anti spam (2 sec delay per user)
-    const now = Date.now();
-    if (lastMessageTime[sender] && now - lastMessageTime[sender] < 2000) {
-      return api.sendMessage("⏳ Slow down bro...", thread);
-    }
-    lastMessageTime[sender] = now;
-
-    // 🧠 Commands
-    if (msg === "ping") {
-      await delay(1000);
-      return api.sendMessage("🏓 Pong!", thread);
-    }
-
-    if (msg === "status") {
-      return api.sendMessage("✅ Bot is secure & running 😎", thread);
-    }
-
-    if (msg === "help") {
-      return api.sendMessage(
-        "🔐 Admin Commands:\n- ping\n- status\n- help",
-        thread
-      );
-    }
-
-  });
+app.get("/", (req, res) => {
+	res.send("EREN BOT RUNNING \n author: Eren \n Status: smooth 🥵");
 });
+
+app.listen(PORT, () => {
+	console.log(`✅ Server running at http://localhost:${PORT}`);
+});
+
+// === Start the Goat bot process ===
+function startProject() {
+	const child = spawn("node", ["Goat.js"], {
+		cwd: __dirname,
+		stdio: "inherit",
+		shell: true
+	});
+
+	child.on("close", (code) => {
+		if (code === 2) {
+			log.info("Restarting Project...");
+			startProject();
+		}
+	});
+}
+
+startProject();
