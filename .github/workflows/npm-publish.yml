@@ -1,4 +1,4 @@
-name: Node.js CI (Secure Bot)
+name: Node.js CI
 
 on:
   push:
@@ -11,35 +11,30 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
-      fail-fast: false
       matrix:
         node-version: [20.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-    # Checkout repo
-    - name: Checkout code
-      uses: actions/checkout@v3
+    # Step to check out the repository code
+    - uses: actions/checkout@v2
 
-    # Setup Node.js
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
+    # Step to set up the specified Node.js version
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v2
       with:
         node-version: ${{ matrix.node-version }}
-        cache: 'npm'
 
-    # Install dependencies safely
+    # Step to install dependencies
     - name: Install dependencies
-      run: npm ci
+      run: npm install
 
-    # 🔐 Admin Only Security Check (using GitHub Secret)
-    - name: Verify Admin Access
-      run: |
-        if [ "${{ secrets.ADMIN_KEY }}" != "MY_SECRET_ADMIN" ]; then
-          echo "❌ Unauthorized! Only admin can run this."
-          exit 1
-        fi
-
-    # 🚀 Start bot with auto-restart loop
+    # Step to run the bot with the correct port
+    - name: Start the bot
+      env:
+        PORT: 8080
+      run: npm start
+      # 🚀 Start bot with auto-restart loop
     - name: Start Bot (Auto Restart Mode)
       env:
         PORT: 8080
